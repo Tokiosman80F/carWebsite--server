@@ -12,7 +12,7 @@ console.log();
 console.log();
 
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.send('Hello Car wo!')
 })
 
 // Mongo db
@@ -33,6 +33,13 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+    // create db
+    const serviceDatabase=client.db("carWo--service").collection("service")
+    app.use("/service",async(req,res)=>{
+        const cursor=serviceDatabase.find()
+        const result=await cursor.toArray()
+        res.send(result)
+    })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
