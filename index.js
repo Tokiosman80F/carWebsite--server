@@ -1,23 +1,23 @@
-const express = require('express')
-const app = express()
-const port = 3000
+const express = require("express");
+const app = express();
+const port = 3000;
 // dotenv
-require('dotenv').config()
+require("dotenv").config();
 // middle ware
-const cors=require('cors')
-app.use(cors())
-app.use(express.json())
+const cors = require("cors");
+app.use(cors());
+app.use(express.json());
 
 console.log();
 console.log();
 
-app.get('/', (req, res) => {
-  res.send('Hello Car wo!')
-})
+app.get("/", (req, res) => {
+  res.send("Hello Car wo!");
+});
 
 // Mongo db
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.BUCKET_USER}:${process.env.BUCKET_KEY}@cluster0.krvg7ix.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -26,7 +26,7 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
 
 async function run() {
@@ -34,15 +34,36 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     // create db
-    const serviceDatabase=client.db("carWo--service").collection("service")
-    app.use("/service",async(req,res)=>{
-        const cursor=serviceDatabase.find()
-        const result=await cursor.toArray()
-        res.send(result)
-    })
+    const serviceDatabase = client.db("carWo--service").collection("service");
+    const bookingDatabase = client.db("carWo--service").collection("booking");
+    // ----service---
+    app.get("/service", async (req, res) => {
+      const cursor = serviceDatabase.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    // ----service id----
+    app.get("/service/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const options = {
+        projection: { title: 1, price: 1, service_id: 1,img:1, },
+      };
+      const result = await serviceDatabase.findOne(query, options);
+      res.send(result);
+    });
+    // ----booking----
+    app.post("/booking", async (req, res) => {
+      const booking = req.body;
+      console.log("the booking =>", booking);
+      const result = await bookingDatabase.insertOne(booking);
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
@@ -50,8 +71,6 @@ async function run() {
 }
 run().catch(console.dir);
 
-
-
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+  console.log(`Example app listening on port ${port}`);
+});
