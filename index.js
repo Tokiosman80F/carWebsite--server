@@ -72,8 +72,8 @@ async function run() {
     });
 
     app.delete('/booking/:id',async(req,res)=>{
-      const id=req.body.id
-      const query={id: new ObjectId(id)}
+      const id=req.params.id
+      const query={_id: new ObjectId(id)}
       const result= await bookingDatabase.deleteOne(query)
       res.send(result)
     })
