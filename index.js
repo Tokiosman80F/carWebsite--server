@@ -47,7 +47,7 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const options = {
-        projection: { title: 1, price: 1, service_id: 1,img:1, },
+        projection: { title: 1, price: 1, service_id: 1, img: 1 },
       };
       const result = await serviceDatabase.findOne(query, options);
       res.send(result);
@@ -57,6 +57,17 @@ async function run() {
       const booking = req.body;
       console.log("the booking =>", booking);
       const result = await bookingDatabase.insertOne(booking);
+      console.log("the result =>", result);
+      res.send(result);
+    });
+    app.get("/booking", async (req, res) => {
+      console.log("the query", req.query);
+      let query = {};
+      if (req.query?.email) {
+        query = { email: req.query.email };
+      }
+      const cursor = bookingDatabase.find(query);
+      const result = await cursor.toArray();
       res.send(result);
     });
     // Send a ping to confirm a successful connection
